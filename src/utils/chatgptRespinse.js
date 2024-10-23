@@ -1,7 +1,7 @@
 import Together from "together-ai";
 
 const together = new Together({
-    apiKey: process.env.TOGETHER_API_KEY || "b39ad34ba2524cf3d9bc3c0ce8ec1bb2df1009080f7bab60dd7c330a5cdaedf4",
+    apiKey: process.env.TOGETHER_API_KEY,
 });
 
 export const chatgptResponse = async (product, allergies, medicalHistory) => {
