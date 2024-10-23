@@ -1,0 +1,24 @@
+{
+    "version": 2,
+    "builds": [
+        {
+            "src": "server.js",
+            "use": "@vercel/node"
+        }
+    ],
+    "routes": [
+        {
+            "src": "/api/(.*)",
+            "dest": "/server.js"
+        }
+    ],
+    "env": {
+        "PORT": "3000",
+        "MONGODB_URI": "mongodb+srv://Samarth:Samarth123@cluster0.bwhhl5b.mongodb.net",
+        "DB_NAME": "foodApp",
+        "ACCESS_TOKEN_SECRET": "dgjcvubfxuyguygbubeyg478rxgfruxf38r7xr784g84gfb8wux",
+        "ACCESS_TOKEN_EXPIRY": "2d",
+        "TOGETHER_API_KEY": "b39ad34ba2524cf3d9bc3c0ce8ec1bb2df1009080f7bab60dd7c330a5cdaedf4"
+    },
+    "ignoreCommand": "git diff --quiet HEAD^ HEAD ./src"
+}
