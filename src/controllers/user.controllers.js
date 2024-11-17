@@ -191,16 +191,37 @@ const profileUser = asyncHandler(async (req, res) => {
     }
 });
 
-// const userProfile = asyncHandler(async (req, res) => {
-//     return res.status(200).json(
-//         new ApiResponse(
-//             200,
-//             {
-//                 user: req.user,
-//             },
-//             "Current user fetched sucessfully"
-//         )
-//     );
-// });
+const userName = asyncHandler(async(req, res) => {
+    try {
+        const authHeader = req.headers.authorization;
 
-export { registerUser, loginUser, logoutUser, profileUser };
+        // console.log(authHeader)
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+            throw new ApiError(401, "Unauthorized request. No token provided.");
+        }
+
+        const token = authHeader.split(" ")[1];
+
+        // console.log(token)
+
+        const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+
+        const user = await User.findById(decodedToken?._id).select("-password");
+
+        if (!user) {
+            throw new ApiError(401, "Invalid Access Token. User not found.");
+        }
+
+        const fullName = user.name.split(" ");
+
+        const name = fullName[0];
+
+        console.log(name);
+
+        return res.status(200).json(new ApiResponse(200, {name}, "Name fetch Successfully"))
+    } catch (error) {
+        throw new ApiError(404, "User name not found successfully")
+    }
+})
+
+export { registerUser, loginUser, logoutUser, profileUser, userName };

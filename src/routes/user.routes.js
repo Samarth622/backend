@@ -5,6 +5,7 @@ import {
     // userProfile,
     profileUser,
     registerUser,
+    userName,
 } from "../controllers/user.controllers.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
@@ -16,3 +17,5 @@ userRouter.route("/profile").get(profileUser);
 userRouter.route("/editProfile").put(profileUser);
 
 userRouter.route("/logout").post(logoutUser);
+
+userRouter.route("/username").get(userName);
