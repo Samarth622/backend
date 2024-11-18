@@ -3,11 +3,14 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { chatgptResponse } from "../utils/chatgptRespinse.js";
 import jwt from "jsonwebtoken";
+// import client from "../utils/cloudvision.js";
+import vision from "@google-cloud/vision";
 import { User } from "../models/user.model.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
 let analysis, productData, productDescription, healthMeter;
 
-const productAnalysis = async (req, res) => {
+const productAnalysis = asyncHandler(async (req, res) => {
     const { barcode, token } = req.body
 
     if (!token) {
@@ -48,9 +51,9 @@ const productAnalysis = async (req, res) => {
     console.log(healthMeter);
 
     return res.status(200).json(new ApiResponse(200, "Analysis successfully"));
-};
+});
 
-const productAna = async (req, res) => {
+const productAna =asyncHandler(async (req, res) => {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
         throw new ApiError(401, "Unauthorized User or Invalid token !!!");
@@ -101,9 +104,9 @@ const productAna = async (req, res) => {
     console.log(healthMeter);
 
     return res.status(200).json(new ApiResponse(200, "Analysis successfully"));
-};
+});
 
-const analysisDetail = async (req, res) => {
+const analysisDetail = asyncHandler(async (req, res) => {
     return res
         .status(200)
         .json(
@@ -113,9 +116,9 @@ const analysisDetail = async (req, res) => {
                 "Product Analysis"
             )
         );
-};
+});
 
-const allProduct = async (req, res) => {
+const allProduct = asyncHandler(async (req, res) => {
     try {
         // Get the category from query parameters (if provided)
         const category = req.query.category;
@@ -141,6 +144,64 @@ const allProduct = async (req, res) => {
         // Handle errors and return an appropriate response
         throw new ApiError(404, "Error fetching products");
     }
+});
+
+const extractText = async (req, res) => {
+    try {
+        if (!req.file) {
+            throw new ApiError(400, 'No image file provided');
+        }
+
+        // Validate file type
+        if (!['image/jpeg', 'image/png', 'image/jpg'].includes(req.file.mimetype)) {
+            throw new ApiError(400, 'Invalid file type. Only JPEG and PNG are allowed.');
+        }
+
+        // Log environment variables (for development/debugging)
+        if (process.env.NODE_ENV === 'development') {
+            console.log('Client Email:', process.env.GOOGLE_CLOUD_CLIENT_EMAIL);
+            console.log('Project ID:', process.env.GOOGLE_CLOUD_PROJECT_ID);
+        }
+
+        // Initialize Vision API client
+        const client = new vision.ImageAnnotatorClient({
+            credentials: {
+                client_email: process.env.GOOGLE_CLOUD_CLIENT_EMAIL,
+                private_key: process.env.GOOGLE_CLOUD_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+            },
+            projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
+        });
+
+        // Perform text detection on the image
+        const [result] = await client.textDetection({
+            image: {
+                content: req.file.buffer,
+            },
+        });
+
+        const detections = result.textAnnotations;
+
+        if (!detections || detections.length === 0) {
+            throw new ApiError(400, 'No text detected in the image');
+        }
+
+        // Extract the full text (from the first annotation)
+        const extractedText = detections[0].description;
+
+        // Send response
+        return res.status(200).json(new ApiResponse(200, { extractedText }, 'Text extracted successfully'));
+    } catch (error) {
+        console.error('Error processing image:', error);
+
+        // Handle API-specific or validation errors
+        if (error.code === 7) {
+            throw new ApiError(500, 'Authentication error with Google Vision API. Check credentials.');
+        }
+
+        // Generic error
+        throw new ApiError(500, 'Failed to process the image');
+    }
 };
 
-export { productAnalysis, analysisDetail, allProduct, productAna };
+
+export { productAnalysis, analysisDetail, allProduct, productAna, extractText };
