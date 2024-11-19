@@ -188,6 +188,8 @@ const extractText = async (req, res) => {
         // Extract the full text (from the first annotation)
         const extractedText = detections[0].description;
 
+        console.log(extractedText);
+
         // Send response
         return res.status(200).json(new ApiResponse(200, { extractedText }, 'Text extracted successfully'));
     } catch (error) {

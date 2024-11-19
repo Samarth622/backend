@@ -8,7 +8,8 @@ export const productRouter = Router();
 const upload = multer({
     limits: {
       fileSize: 5 * 1024 * 1024, // 5MB limit
-    }
+    },
+    storage: multer.memoryStorage(), // Store in memory for Vision API
 });
 
 productRouter.route('/analysis').post(productAnalysis)
