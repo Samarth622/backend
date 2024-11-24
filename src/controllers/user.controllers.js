@@ -187,7 +187,7 @@ const profileUser = asyncHandler(async (req, res) => {
         if (error.name === 'JsonWebTokenError') {
             throw new ApiError(401, "Invalid token");
         }
-        throw new ApiError(400, error);
+        throw new ApiError(400, error)
     }
 });
 

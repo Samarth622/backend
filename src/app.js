@@ -32,4 +32,4 @@ app.use(cookieParser());
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/products", productRouter);
 
-export { app };
+export { app }
